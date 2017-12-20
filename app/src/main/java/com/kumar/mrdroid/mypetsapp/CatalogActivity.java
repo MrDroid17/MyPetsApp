@@ -13,6 +13,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
 
+import com.kumar.mrdroid.mypetsapp.data.PetContract;
 import com.kumar.mrdroid.mypetsapp.data.PetContract.PetEntry;
 import com.kumar.mrdroid.mypetsapp.data.PetDbHelper;
 
@@ -53,7 +54,6 @@ public class CatalogActivity extends AppCompatActivity {
         //PetDbHelper mDbHelper = new PetDbHelper(this);
 
         // Create and/or open a database to read from it
-        SQLiteDatabase db = mDbHelper.getReadableDatabase();
 
         // Perform this raw SQL query "SELECT * FROM pets"
         // to get a Cursor that contains all rows from the pets table.
@@ -66,7 +66,10 @@ public class CatalogActivity extends AppCompatActivity {
                 PetEntry.COLUMN_PET_WEIGHT
         };
 
-        Cursor cursor = db.query(
+        /***
+         * This is bad practice so, replace with content resolver
+         *
+                Cursor cursor = db.query(
                 PetEntry.TABLE_NAME,
                 projection,
                 null,
@@ -75,12 +78,21 @@ public class CatalogActivity extends AppCompatActivity {
                 null,
                 null
         );
+         */
+
+
+        Cursor cursor = getContentResolver().query(
+                PetEntry.CONTENT_URI,
+                projection,
+                null,
+                null,
+                null);
 
 
         try {
             // Display the number of rows in the Cursor (which reflects the number of rows in the
             // pets table in the database).
-            TextView displayView = (TextView) findViewById(R.id.text_view_pet);
+            TextView displayView = findViewById(R.id.text_view_pet);
             displayView.setText("Pets table contains  " + cursor.getCount()+ " pets \n\n");
 
             displayView.append(PetEntry._ID + " - "+
