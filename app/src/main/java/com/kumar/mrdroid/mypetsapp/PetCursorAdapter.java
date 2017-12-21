@@ -44,6 +44,5 @@ public class PetCursorAdapter extends CursorAdapter {
         petBreed.setText(pet_Breed);
 
 
-
     }
 }

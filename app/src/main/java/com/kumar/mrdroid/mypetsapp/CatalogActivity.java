@@ -89,7 +89,20 @@ public class CatalogActivity extends AppCompatActivity {
                 null,
                 null);
 
-        ListView listView = (ListView) findViewById(R.id.list_View);
+        /***
+         * inside a view casting not required deprecated In AndroidStudio 3.0.0 with sdk 26:
+         */
+        ListView listView = findViewById(R.id.list_View);
+
+        /***
+         * find and set empty view
+         */
+        View emptyView = findViewById(R.id.empty_view);
+        listView.setEmptyView(emptyView);
+
+        /***
+         * set cursorAdapter to list view
+         */
         PetCursorAdapter cursorAdapter= new PetCursorAdapter(this, cursor);
         listView.setAdapter(cursorAdapter);
     }
