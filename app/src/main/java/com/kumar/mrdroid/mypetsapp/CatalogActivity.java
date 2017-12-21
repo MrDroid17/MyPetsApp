@@ -1,6 +1,7 @@
 package com.kumar.mrdroid.mypetsapp;
 
 import android.app.LoaderManager;
+import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.CursorLoader;
 import android.content.Intent;
@@ -15,6 +16,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -61,6 +63,23 @@ public class CatalogActivity extends AppCompatActivity implements
          */
         mCursorAdapter= new PetCursorAdapter(this, null);
         listView.setAdapter(mCursorAdapter);
+
+        /***
+         * set up item click listener to on listview
+         */
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
+
+                Intent intent = new Intent(CatalogActivity.this, EditorActivity.class);
+
+                Uri currentPetUri = ContentUris.withAppendedId(PetEntry.CONTENT_URI, id);
+                intent.setData(currentPetUri);
+
+                startActivity(intent);
+
+            }
+        });
 
         /***
          * start cursor loader
