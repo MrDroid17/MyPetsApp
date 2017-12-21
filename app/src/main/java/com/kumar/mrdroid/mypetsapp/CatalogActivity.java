@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.content.Loader;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.net.Uri;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -68,8 +69,6 @@ public class CatalogActivity extends AppCompatActivity implements
 
     }
 
-
-
     /*****
      *
      * insertPet() method for generating Dummy data
@@ -77,9 +76,6 @@ public class CatalogActivity extends AppCompatActivity implements
 
 
     private void insertPet(){
-        PetDbHelper mDbHelper = new PetDbHelper(this);
-
-        SQLiteDatabase db = mDbHelper.getWritableDatabase();
 
         ContentValues values= new ContentValues();
         values.put(PetEntry.COLUMN_PET_NAME, "bear");
@@ -87,9 +83,11 @@ public class CatalogActivity extends AppCompatActivity implements
         values.put(PetEntry.COLUMN_PET_GENDER, PetEntry.GENDER_MALE);
         values.put(PetEntry.COLUMN_PET_WEIGHT, 7);
 
-        long newRowId = db.insert(PetEntry.TABLE_NAME, null, values);
-
-        Log.v("Catalog Activity", "newRowId: " + newRowId);
+        // Insert a new row for Toto into the provider using the ContentResolver.
+        // Use the {@link PetEntry#CONTENT_URI} to indicate that we want to insert
+        // into the pets database table.
+        // Receive the new content URI that will allow us to access Toto's data in the future.
+        Uri newUri = getContentResolver().insert(PetEntry.CONTENT_URI, values);
     }
 
     @Override
