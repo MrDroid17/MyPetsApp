@@ -1,7 +1,10 @@
 package com.kumar.mrdroid.mypetsapp;
 
+import android.app.LoaderManager;
 import android.content.ContentValues;
+import android.content.CursorLoader;
 import android.content.Intent;
+import android.content.Loader;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.support.design.widget.FloatingActionButton;
@@ -18,9 +21,14 @@ import com.kumar.mrdroid.mypetsapp.data.PetContract;
 import com.kumar.mrdroid.mypetsapp.data.PetContract.PetEntry;
 import com.kumar.mrdroid.mypetsapp.data.PetDbHelper;
 
-public class CatalogActivity extends AppCompatActivity {
+public class CatalogActivity extends AppCompatActivity implements
+        LoaderManager.LoaderCallbacks<Cursor> {
+
+    private static final int PET_LOADER = 0;
+    private PetCursorAdapter mCursorAdapter;
+
     private FloatingActionButton fab;
-    private PetDbHelper mDbHelper;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,61 +46,8 @@ public class CatalogActivity extends AppCompatActivity {
             }
         });
 
-        mDbHelper = new PetDbHelper(this);
-        displayDatabaseInfo();
 
-    }
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-        displayDatabaseInfo();
-    }
-
-    private void displayDatabaseInfo() {
-        // To access our database, we instantiate our subclass of SQLiteOpenHelper
-        // and pass the context, which is the current activity.
-        //PetDbHelper mDbHelper = new PetDbHelper(this);
-
-        // Create and/or open a database to read from it
-
-        // Perform this raw SQL query "SELECT * FROM pets"
-        // to get a Cursor that contains all rows from the pets table.
-
-        String[] projection= {
-                PetEntry._ID,
-                PetEntry.COLUMN_PET_NAME,
-                PetEntry.COLUMN_PET_BREED,
-                PetEntry.COLUMN_PET_GENDER,
-                PetEntry.COLUMN_PET_WEIGHT
-        };
-
-        /***
-         * This is bad practice so, replace with content resolver
-         *
-                Cursor cursor = db.query(
-                PetEntry.TABLE_NAME,
-                projection,
-                null,
-                null,
-                null,
-                null,
-                null
-        );
-         */
-
-
-        Cursor cursor = getContentResolver().query(
-                PetEntry.CONTENT_URI,
-                projection,
-                null,
-                null,
-                null);
-
-        /***
-         * inside a view casting not required deprecated In AndroidStudio 3.0.0 with sdk 26:
-         */
-        ListView listView = findViewById(R.id.list_View);
+        ListView listView = (ListView) findViewById(R.id.list_View);
 
         /***
          * find and set empty view
@@ -103,9 +58,17 @@ public class CatalogActivity extends AppCompatActivity {
         /***
          * set cursorAdapter to list view
          */
-        PetCursorAdapter cursorAdapter= new PetCursorAdapter(this, cursor);
-        listView.setAdapter(cursorAdapter);
+        mCursorAdapter= new PetCursorAdapter(this, null);
+        listView.setAdapter(mCursorAdapter);
+
+        /***
+         * start cursor loader
+         */
+        getLoaderManager().initLoader(PET_LOADER, null, this);
+
     }
+
+
 
     /*****
      *
@@ -114,6 +77,7 @@ public class CatalogActivity extends AppCompatActivity {
 
 
     private void insertPet(){
+        PetDbHelper mDbHelper = new PetDbHelper(this);
 
         SQLiteDatabase db = mDbHelper.getWritableDatabase();
 
@@ -144,7 +108,6 @@ public class CatalogActivity extends AppCompatActivity {
             case R.id.action_insert_dummy_data:
                 // Do nothing for now
                 insertPet();
-                displayDatabaseInfo();
                 return true;
             // Respond to a click on the "Delete all entries" menu option
             case R.id.action_delete_all_entries:
@@ -152,5 +115,34 @@ public class CatalogActivity extends AppCompatActivity {
                 return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
+
+        String[] projection= {
+                PetEntry._ID,
+                PetEntry.COLUMN_PET_NAME,
+                PetEntry.COLUMN_PET_BREED,
+        };
+
+        return new CursorLoader(this,
+                PetEntry.CONTENT_URI,
+                projection,
+                null,
+                null,
+                null);
+    }
+
+    @Override
+    public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
+        mCursorAdapter.swapCursor(cursor);
+
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Cursor> loader) {
+
+        mCursorAdapter.swapCursor(null);
     }
 }
